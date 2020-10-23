@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
   Image,
   View,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
+  TextInput,
 } from 'react-native';
+
+import { Form } from '@unform/mobile';
+import { FormHandles } from '@unform/core';
 
 import { useNavigation } from '@react-navigation/native';
 
@@ -19,7 +23,16 @@ import logoImg from '../../assets/logo.png';
 import { Container, Title, BackToSignIn, BackToSignInText } from './styles';
 
 const SignUp: React.FC = () => {
+  const formRef = useRef<FormHandles>(null);
+
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+
   const navigation = useNavigation();
+
+  const handleSubmit = useCallback(() => {
+    formRef.current?.submitForm();
+  }, []);
 
   return (
     <>
@@ -37,17 +50,46 @@ const SignUp: React.FC = () => {
             <View>
               <Title>Crie sua conta</Title>
             </View>
-
-            <Input name="name" icon="user" placeholder="Nome" />
-            <Input name="email" icon="mail" placeholder="E-mail" />
-            <Input name="password" icon="lock" placeholder="Senha" />
-            <Button
-              onPress={() => {
-                console.log('ok');
+            <Form
+              ref={formRef}
+              onSubmit={data => {
+                console.log(data);
               }}
             >
-              Entrar
-            </Button>
+              <Input
+                autoCapitalize="words"
+                name="name"
+                icon="user"
+                placeholder="Nome"
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  emailRef.current?.focus();
+                }}
+              />
+              <Input
+                name="email"
+                icon="mail"
+                placeholder="E-mail"
+                keyboardType="email-address"
+                autoCorrect={false}
+                autoCapitalize="none"
+                ref={emailRef}
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  passwordRef.current?.focus();
+                }}
+              />
+              <Input
+                name="password"
+                icon="lock"
+                placeholder="Senha"
+                secureTextEntry
+                ref={passwordRef}
+                textContentType="newPassword"
+                onSubmitEditing={handleSubmit}
+              />
+            </Form>
+            <Button onPress={handleSubmit}>Cadastrar</Button>
           </Container>
         </ScrollView>
       </KeyboardAvoidingView>
