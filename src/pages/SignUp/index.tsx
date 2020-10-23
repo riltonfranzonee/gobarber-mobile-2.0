@@ -18,6 +18,8 @@ import Icon from 'react-native-vector-icons/Feather';
 
 import * as Yup from 'yup';
 
+import api from '../../services/api';
+
 import getValidationErrors from '../../utils/getValidationErrors';
 
 import Input from '../../components/Input';
@@ -41,36 +43,51 @@ const SignUp: React.FC = () => {
 
   const navigation = useNavigation();
 
-  const handleSignUp = useCallback(async (data: SignUpDto) => {
-    try {
-      formRef.current?.setErrors({});
+  const handleSignUp = useCallback(
+    async (data: SignUpDto) => {
+      try {
+        formRef.current?.setErrors({});
 
-      const schema = Yup.object().shape({
-        name: Yup.string().required('Nome obrigatório'),
-        email: Yup.string()
-          .required('Email obrigatório')
-          .email('Digite um email válido'),
-        password: Yup.string().min(6, 'Senha deve conter no mínimo 6 dígitos'),
-      });
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Nome obrigatório'),
+          email: Yup.string()
+            .required('Email obrigatório')
+            .email('Digite um email válido'),
+          password: Yup.string().min(
+            6,
+            'Senha deve conter no mínimo 6 dígitos',
+          ),
+        });
 
-      await schema.validate(data, { abortEarly: false });
-    } catch (error) {
-      const errors = getValidationErrors(error);
+        await schema.validate(data, { abortEarly: false });
 
-      if (error instanceof Yup.ValidationError) {
+        await api.post('/users', data);
+
+        Alert.alert(
+          'Cadastro realizado com sucesso!',
+          'Você já pode fazer o login na aplicação',
+        );
+
+        navigation.navigate('SignIn');
+      } catch (error) {
+        const errors = getValidationErrors(error);
+
+        if (error instanceof Yup.ValidationError) {
+          formRef.current?.setErrors(errors);
+
+          return;
+        }
+
         formRef.current?.setErrors(errors);
 
-        return;
+        Alert.alert(
+          'Erro no cadastro',
+          'Houve uma falha na criação da conta, tente novamente',
+        );
       }
-
-      formRef.current?.setErrors(errors);
-
-      Alert.alert(
-        'Erro no cadastro',
-        'Houve uma falha na criação da conta, tente novamente',
-      );
-    }
-  }, []);
+    },
+    [navigation],
+  );
 
   const handleSubmit = useCallback(() => {
     formRef.current?.submitForm();
