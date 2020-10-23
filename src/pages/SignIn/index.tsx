@@ -18,6 +18,8 @@ import { FormHandles } from '@unform/core';
 
 import Icon from 'react-native-vector-icons/Feather';
 
+import { useAuth } from '../../hooks/auth';
+
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
@@ -45,7 +47,9 @@ const SignIn: React.FC = () => {
 
   const passwordRef = useRef<TextInput>(null);
 
-  const handleSignIn = useCallback(async (data: SignInDTO) => {
+  const { signIn, user } = useAuth();
+
+  const handleSignIn = useCallback(async ({ email, password }: SignInDTO) => {
     try {
       formRef.current?.setErrors({});
 
@@ -56,9 +60,9 @@ const SignIn: React.FC = () => {
         password: Yup.string().required('Senha obrigatória'),
       });
 
-      await schema.validate(data, { abortEarly: false });
+      await schema.validate({ email, password }, { abortEarly: false });
 
-      console.log(data);
+      await signIn({ email, password });
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
         const errors = getValidationErrors(error);
