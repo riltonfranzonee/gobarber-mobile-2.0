@@ -41,6 +41,8 @@
     "@typescript-eslint/camelcase": "off",
     "no-use-before-define": "off",
     "@typescript-eslint/ban-types": "off",
+    "prefer-destructuring": "off",
+    "camelcase": "off",
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
